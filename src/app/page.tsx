@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import styles from "./page.module.css";
 import { Line } from "react-chartjs-2";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -306,7 +307,7 @@ export default function Home() {
               return (
                 <div key={idx} className={styles.aiBubble}>
                   <div ref={isLatest ? insightRef : undefined} className={styles.bubbleContent}>
-                    <ReactMarkdown>{msg.text}</ReactMarkdown>
+                    <ReactMarkdown rehypePlugins={[rehypeRaw]}>{msg.text}</ReactMarkdown>
                   </div>
                   {isLatest && (
                     <button className={styles.sendBtn} style={{ marginTop: 8 }} onClick={handleDownloadPDF}>

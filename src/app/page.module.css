@@ -331,3 +331,40 @@ a.secondary {
   0% { opacity: 1; }
   100% { opacity: 0; top: 100vh; }
 }
+
+.sectionCard {
+  background: #eaffea;
+  border-radius: 18px;
+  padding: 24px 20px 20px 20px;
+  margin: 18px 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  border-left: 6px solid #4caf50;
+}
+
+.sectionCard.negative {
+  background: #fff0f0;
+  border-left: 6px solid #f44336;
+}
+
+.sectionCard.neutral {
+  background: #f7f7f7;
+  border-left: 6px solid #bdbdbd;
+}
+
+.sectionHeader {
+  font-size: 1.3em;
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.verdict {
+  font-weight: bold;
+  font-size: 1.1em;
+  margin: 10px 0 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
