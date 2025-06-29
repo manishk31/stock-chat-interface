@@ -3,8 +3,6 @@ import React, { useState, useRef, useEffect } from "react";
 import styles from "./page.module.css";
 import { Line } from "react-chartjs-2";
 import ReactMarkdown from "react-markdown";
-// @ts-expect-error: No types for html2pdf.js
-import html2pdf from "html2pdf.js";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -278,8 +276,9 @@ export default function Home() {
   };
 
   // PDF export handler
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     if (insightRef.current) {
+      const html2pdf = (await import("html2pdf.js")).default;
       html2pdf().from(insightRef.current).set({ margin: 0.5, filename: "stock-insight.pdf", html2canvas: { scale: 2 } }).save();
     }
   };
