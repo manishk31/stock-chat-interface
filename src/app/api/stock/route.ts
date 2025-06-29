@@ -54,6 +54,24 @@ export async function GET(req: NextRequest) {
     fileUrl = `https://storage.googleapis.com/${BUCKET_NAME}/${FILE_PREFIX}${date}_${time || '00-00'}${FILE_SUFFIX}`;
   }
 
+  // If 'all' is set, always return the full dataset
+  if (all) {
+    if (!fileUrl) fileUrl = await getLatestFileUrl();
+    if (!fileUrl) {
+      return NextResponse.json({ error: 'No data file found in bucket' }, { status: 500 });
+    }
+    try {
+      const response = await fetch(fileUrl);
+      if (!response.ok) {
+        return NextResponse.json({ error: `Failed to fetch data from remote source: ${fileUrl}` }, { status: 500 });
+      }
+      const data = await response.json();
+      return NextResponse.json(data);
+    } catch (e) {
+      return NextResponse.json({ error: 'Failed to fetch or parse data', details: String(e) }, { status: 500 });
+    }
+  }
+
   if (history && symbol) {
     // Aggregate historical data for the symbol
     const files = await getHistoricalFiles();
@@ -84,6 +102,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(series);
   }
 
+  if (!symbol) {
+    return NextResponse.json({ error: 'No symbol provided. Please provide a ?symbol=... query parameter.' }, { status: 400 });
+  }
+
   if (!fileUrl) {
     fileUrl = await getLatestFileUrl();
   }
@@ -97,13 +119,6 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: `Failed to fetch data from remote source: ${fileUrl}` }, { status: 500 });
     }
     const data = await response.json();
-    if (all) {
-      return NextResponse.json(data);
-    }
-    if (!symbol) {
-      return NextResponse.json({ error: 'No symbol provided' }, { status: 400 });
-    }
-    // Fuzzy match symbol to Name field (case-insensitive substring)
     const symbolLower = symbol.toLowerCase();
     const match = (data as Record<string, unknown>[]).find(
       (item) => typeof item === 'object' && item !== null &&
