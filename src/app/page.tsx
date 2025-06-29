@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import styles from "./page.module.css";
 import { Line } from "react-chartjs-2";
 import ReactMarkdown from "react-markdown";
-// @ts-ignore: No types for html2pdf.js
+// @ts-expect-error: No types for html2pdf.js
 import html2pdf from "html2pdf.js";
 import {
   Chart as ChartJS,
