@@ -278,3 +278,56 @@ a.secondary {
   text-align: center;
   margin: 12px 0;
 }
+
+.positiveTheme {
+  background: linear-gradient(135deg, #e0ffe0 0%, #b2f7b2 100%);
+  transition: background 0.5s;
+}
+
+.negativeTheme {
+  background: linear-gradient(135deg, #fff0f0 0%, #ffb2b2 100%);
+  transition: background 0.5s;
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-8px); }
+  80% { transform: translateX(8px); }
+  100% { transform: translateX(0); }
+}
+
+.funnyBubble {
+  background: #fffbe6;
+  color: #b8860b;
+  border: 2px dashed #ffe066;
+  border-radius: 18px;
+  padding: 12px 18px;
+  margin: 8px 0;
+  font-style: italic;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: popIn 0.5s;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.confetti {
+  position: absolute;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  animation: confetti-fall 1.5s linear;
+}
+
+@keyframes confetti-fall {
+  0% { opacity: 1; }
+  100% { opacity: 0; top: 100vh; }
+}

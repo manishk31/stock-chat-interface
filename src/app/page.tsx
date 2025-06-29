@@ -2,6 +2,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import styles from "./page.module.css";
 import { Line } from "react-chartjs-2";
+import ReactMarkdown from "react-markdown";
+// @ts-ignore: No types for html2pdf.js
+import html2pdf from "html2pdf.js";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -23,11 +26,43 @@ ChartJS.register(
   Legend
 );
 
+const FUNNY_INSIGHTS = [
+  "Remember: Even Warren Buffett started with one share! 🧓💸",
+  "Investing tip: Don't put all your eggs in one basket... unless it's a golden basket! 🥚✨",
+  "Stocks go up, stocks go down, but coffee always helps. ☕📈",
+  "If you think investing is risky, try not investing! 😅",
+  "Buy low, sell high. Or just hold and hope! 🤞",
+  "The best time to plant a tree was 20 years ago. The second best time is now. 🌳💰",
+  "Remember: Bulls make money, bears make money, pigs get slaughtered. 🐂🐻🐖",
+  "If your stock advice comes from a cat, reconsider. 🐱💹",
+  "Investing is like a rollercoaster—enjoy the ride! 🎢",
+  "When in doubt, zoom out! 🔍➡️"
+];
+
+function isPositiveInsight(text: string) {
+  const positiveWords = ["good investment", "buy", "bullish", "positive", "strong", "uptrend", "opportunity", "worth investing", "recommend", "favorable", "green flag", "growth"];
+  return positiveWords.some((w) => text.toLowerCase().includes(w));
+}
+function isNegativeInsight(text: string) {
+  const negativeWords = ["not recommended", "avoid", "bearish", "negative", "risk", "downtrend", "overvalued", "warning", "red flag", "decline", "weak", "volatile", "caution"];
+  return negativeWords.some((w) => text.toLowerCase().includes(w));
+}
+
+function getEmojiForInsight(text: string) {
+  if (isPositiveInsight(text)) return "🚀🟢";
+  if (isNegativeInsight(text)) return "⚠️🔴";
+  return "💡";
+}
+
+function maybeFunnyInsight() {
+  return Math.random() < 0.25 ? FUNNY_INSIGHTS[Math.floor(Math.random() * FUNNY_INSIGHTS.length)] : null;
+}
+
 interface ChatMessage {
   sender: "user" | "ai";
   text: string;
   timestamp: string;
-  type?: "text" | "chart" | "sentiment" | "insight";
+  type?: "text" | "chart" | "sentiment" | "insight" | "funny";
 }
 
 export default function Home() {
@@ -35,7 +70,11 @@ export default function Home() {
   const [chat, setChat] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [latestStockData, setLatestStockData] = useState<Record<string, unknown> | null>(null);
+  const [historySeries, setHistorySeries] = useState<Record<string, unknown>[]>([]);
+  const [theme, setTheme] = useState<string>("");
+  const [showConfetti, setShowConfetti] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const insightRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -52,65 +91,91 @@ export default function Home() {
     setChat((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
+    setTheme("");
+    setShowConfetti(false);
 
-    // 1. Fetch all stock data (array)
-    let allStocks: Record<string, unknown>[] = [];
+    // 1. Fetch historical data for the symbol
     let bestMatch: Record<string, unknown> | null = null;
+    let series: Record<string, unknown>[] = [];
     const aiMsgs: ChatMessage[] = [];
     try {
-      const stockRes = await fetch(`/api/stock?all=1`);
-      if (stockRes.ok) {
-        allStocks = await stockRes.json();
-        // Dynamically import fuse.js for fuzzy search
-        const Fuse = (await import("fuse.js")).default;
-        const fuse = new Fuse(allStocks, {
-          keys: ["Name"],
-          threshold: 0.4,
+      const res = await fetch(`/api/stock?symbol=${encodeURIComponent(input.trim())}&history=1`);
+      if (res.ok) {
+        series = await res.json();
+        setHistorySeries(series);
+        bestMatch = series[series.length - 1]; // latest data point
+        setLatestStockData(bestMatch);
+        aiMsgs.push({
+          sender: "ai",
+          text: `Found company: ${bestMatch["Name"] as string}`,
+          timestamp: new Date().toLocaleTimeString(),
         });
-        const results = fuse.search(input.trim());
-        if (results.length > 0) {
-          bestMatch = results[0].item as Record<string, unknown>;
-        }
+      } else {
+        aiMsgs.push({
+          sender: "ai",
+          text: `Could not find any company matching "${input}". Please try again.`,
+          timestamp: new Date().toLocaleTimeString(),
+        });
+        setLatestStockData(null);
+        setHistorySeries([]);
+        setChat((prev) => [...prev, ...aiMsgs]);
+        setLoading(false);
+        return;
       }
     } catch {
-      // ignore, will handle below
-    }
-    if (!bestMatch) {
       aiMsgs.push({
         sender: "ai",
-        text: `Could not find any company matching "${input}". Please try again.`,
+        text: `Error fetching historical data for "${input}".`,
         timestamp: new Date().toLocaleTimeString(),
       });
       setLatestStockData(null);
+      setHistorySeries([]);
       setChat((prev) => [...prev, ...aiMsgs]);
       setLoading(false);
       return;
     }
-    setLatestStockData(bestMatch);
-    aiMsgs.push({
-      sender: "ai",
-      text: `Found company: ${bestMatch["Name"] as string}`,
-      timestamp: new Date().toLocaleTimeString(),
-    });
-    // 2. Fetch insights
+    // 2. Fetch insights using the historical series
+    let insightText = "";
     try {
       const insightsRes = await fetch("/api/insights", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ symbol: bestMatch["Name"], stockData: bestMatch }),
+        body: JSON.stringify({ symbol: bestMatch["Name"], history: series }),
       });
       const insights = await insightsRes.json();
+      insightText = insights.insight || "No insight generated.";
       aiMsgs.push({
         sender: "ai",
-        text: insights.insight || "No insight generated.",
+        text: `${getEmojiForInsight(insightText)} ${insightText}`,
         timestamp: new Date().toLocaleTimeString(),
         type: "insight",
       });
+      // Set theme and confetti/warning based on insight
+      if (isPositiveInsight(insightText)) {
+        setTheme(styles.positiveTheme);
+        setShowConfetti(true);
+      } else if (isNegativeInsight(insightText)) {
+        setTheme(styles.negativeTheme);
+        setShowConfetti(false);
+      } else {
+        setTheme("");
+        setShowConfetti(false);
+      }
     } catch (err) {
       aiMsgs.push({
         sender: "ai",
         text: `Error fetching insights: ${String(err)}`,
         timestamp: new Date().toLocaleTimeString(),
+      });
+    }
+    // 2.5. Occasionally inject a funny investing insight
+    const funny = maybeFunnyInsight();
+    if (funny) {
+      aiMsgs.push({
+        sender: "ai",
+        text: funny,
+        timestamp: new Date().toLocaleTimeString(),
+        type: "funny",
       });
     }
     // 3. Fetch sentiment (simulate news headlines for now)
@@ -141,7 +206,7 @@ export default function Home() {
     // 4. Chart message
     aiMsgs.push({
       sender: "ai",
-      text: "[Chart placeholder: Price/Volume chart will appear here]",
+      text: "[Chart placeholder: Historical Price/Volume chart will appear here]",
       timestamp: new Date().toLocaleTimeString(),
       type: "chart",
     });
@@ -153,6 +218,8 @@ export default function Home() {
     });
     setChat((prev) => [...prev, ...aiMsgs]);
     setLoading(false);
+    // Hide confetti after 2s
+    if (showConfetti) setTimeout(() => setShowConfetti(false), 2000);
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -161,26 +228,26 @@ export default function Home() {
     }
   };
 
-  // Chart rendering logic
+  // Chart rendering logic for historical series
   const renderChart = () => {
-    if (!latestStockData || !latestStockData["Close Price"] || !latestStockData["Daily Volume"]) return null;
-    // For demo, use Close Price as priceHistory and Daily Volume as volume (mocked as arrays)
-    const price = parseFloat((latestStockData["Close Price"] as string).replace(/,/g, ""));
-    const volume = parseFloat((latestStockData["Daily Volume"] as string).replace(/,/g, ""));
-    const labels = ["Today"];
+    if (!historySeries || historySeries.length === 0) return null;
+    // Try to extract price and volume series
+    const labels = historySeries.map((entry) => (entry.date as string)?.slice(0, 10));
+    const prices = historySeries.map((entry) => parseFloat((entry["Close Price"] as string)?.replace(/,/g, "") || "0"));
+    const volumes = historySeries.map((entry) => parseFloat((entry["Daily Volume"] as string)?.replace(/,/g, "") || "0"));
     const data = {
       labels,
       datasets: [
         {
           label: "Price",
-          data: [price],
+          data: prices,
           borderColor: "#0070f3",
           backgroundColor: "rgba(0,112,243,0.1)",
           yAxisID: "y",
         },
         {
           label: "Volume",
-          data: [volume],
+          data: volumes,
           borderColor: "#f39c12",
           backgroundColor: "rgba(243,156,18,0.1)",
           yAxisID: "y1",
@@ -191,7 +258,7 @@ export default function Home() {
       responsive: true,
       plugins: {
         legend: { position: "top" as const },
-        title: { display: true, text: `Price & Volume for ${latestStockData["Name"] as string}` },
+        title: { display: true, text: `Historical Price & Volume for ${latestStockData ? (latestStockData["Name"] as string) : ""}` },
       },
       scales: {
         y: { type: "linear" as const, display: true, position: "left" as const },
@@ -210,14 +277,46 @@ export default function Home() {
     );
   };
 
+  // PDF export handler
+  const handleDownloadPDF = () => {
+    if (insightRef.current) {
+      html2pdf().from(insightRef.current).set({ margin: 0.5, filename: "stock-insight.pdf", html2canvas: { scale: 2 } }).save();
+    }
+  };
+
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${theme}`.trim()}>
+      {showConfetti && <div className={styles.confetti}>🎉✨🎊🤑💸</div>}
       <main className={styles.main}>
         <h1>Stock Chat Interface</h1>
         <div className={styles.chatContainer}>
           {chat.map((msg, idx) => {
-            if (msg.type === "chart" && latestStockData) {
+            if (msg.type === "chart" && historySeries.length > 0) {
               return <React.Fragment key={idx}>{renderChart()}</React.Fragment>;
+            }
+            if (msg.type === "funny") {
+              return (
+                <div key={idx} className={styles.funnyBubble}>
+                  🤓 {msg.text}
+                </div>
+              );
+            }
+            // Render AI insight as markdown with PDF export button
+            if (msg.type === "insight") {
+              const isLatest = idx === chat.length - 1 || (chat.slice(idx + 1).findIndex(m => m.type === "insight") === -1);
+              return (
+                <div key={idx} className={styles.aiBubble}>
+                  <div ref={isLatest ? insightRef : undefined} className={styles.bubbleContent}>
+                    <ReactMarkdown>{msg.text}</ReactMarkdown>
+                  </div>
+                  {isLatest && (
+                    <button className={styles.sendBtn} style={{ marginTop: 8 }} onClick={handleDownloadPDF}>
+                      Download as PDF
+                    </button>
+                  )}
+                  <div className={styles.timestamp}>{msg.timestamp}</div>
+                </div>
+              );
             }
             return (
               <div

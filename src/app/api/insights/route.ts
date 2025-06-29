@@ -8,12 +8,38 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'OpenAI API key not set' }, { status: 500 });
   }
   const body = await req.json();
-  const { symbol, stockData } = body;
-  if (!symbol || !stockData) {
-    return NextResponse.json({ error: 'Missing symbol or stockData' }, { status: 400 });
+  const { symbol, stockData, history } = body;
+  if (!symbol || (!stockData && !history)) {
+    return NextResponse.json({ error: 'Missing symbol and data' }, { status: 400 });
   }
-  const systemPrompt = `You are a helpful financial assistant. Given the following stock data for ${symbol}, explain in simple, everyday language what it means for someone who is not from a finance background. Avoid jargon. If you use any finance terms (like RSI, P/E, etc.), briefly explain them in plain English. Highlight any trends, risks, or opportunities, and end with a clear, actionable takeaway for a regular person. Be concise and friendly.`;
-  const userPrompt = `Stock data for ${symbol}:\n${JSON.stringify(stockData, null, 2)}`;
+  let systemPrompt = '';
+  let userPrompt = '';
+  const explainInstruction = `For each section, metric, verdict, and recommendation, explain your reasoning in simple, everyday language. If you use any finance terms, explain them. Use analogies or examples if helpful. Make sure a non-finance person can understand not just what you recommend, but why. Make every output actionable and confidence-building for non-experts.`;
+  if (history && Array.isArray(history) && history.length > 1) {
+    systemPrompt = `You are an investment analyst. Using the following 6-month historical stock data, generate a structured, layman-friendly investment evaluation for ${symbol} using these sections:
+1. Financial Strength (metrics, verdicts, conclusion)
+2. Growth Potential (scenarios, verdicts, interpretation)
+3. Valuation & Market Trust (metrics, verdicts, conclusion)
+4. Ownership & Stability (metrics, verdicts, conclusion)
+5. Market Sentiment & Technicals (metrics, verdicts)
+6. Final Recommendation (factors, verdicts)
+7. Investment Strategy (decision criteria, recommendations)
+8. Clear Verdict (one-paragraph summary for a non-expert)
+Use emoji and color cues for verdicts and section headers. ${explainInstruction} Output in markdown or HTML for easy rendering.`;
+    userPrompt = `6-month historical stock data for ${symbol} (each entry is a day or week):\n${JSON.stringify(history, null, 2)}`;
+  } else {
+    systemPrompt = `You are an investment analyst. Using the following stock data, generate a structured, layman-friendly investment evaluation for ${symbol} using these sections:
+1. Financial Strength (metrics, verdicts, conclusion)
+2. Growth Potential (scenarios, verdicts, interpretation)
+3. Valuation & Market Trust (metrics, verdicts, conclusion)
+4. Ownership & Stability (metrics, verdicts, conclusion)
+5. Market Sentiment & Technicals (metrics, verdicts)
+6. Final Recommendation (factors, verdicts)
+7. Investment Strategy (decision criteria, recommendations)
+8. Clear Verdict (one-paragraph summary for a non-expert)
+Use emoji and color cues for verdicts and section headers. ${explainInstruction} Output in markdown or HTML for easy rendering.`;
+    userPrompt = `Stock data for ${symbol}:\n${JSON.stringify(stockData, null, 2)}`;
+  }
   try {
     const response = await fetch(OPENAI_API_URL, {
       method: 'POST',
@@ -27,7 +53,7 @@ export async function POST(req: NextRequest) {
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        max_tokens: 300,
+        max_tokens: 1200,
         temperature: 0.7
       })
     });
