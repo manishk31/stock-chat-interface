@@ -339,6 +339,10 @@ a.secondary {
   margin: 18px 0;
   box-shadow: 0 2px 12px rgba(0,0,0,0.04);
   border-left: 6px solid #4caf50;
+  max-width: 600px;
+  width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .sectionCard.negative {
@@ -367,4 +371,45 @@ a.secondary {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+@media (max-width: 700px) {
+  .sectionCard {
+    max-width: 90vw;
+    padding: 16px 6vw 16px 6vw;
+  }
+}
+
+.aiBubble, .userBubble {
+  max-width: 600px;
+  width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.bubbleContent {
+  max-width: 600px;
+  width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+@media (max-width: 700px) {
+  .aiBubble, .userBubble, .bubbleContent {
+    max-width: 90vw;
+  }
+}
+
+.chartPlaceholder {
+  max-width: 600px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 700px) {
+  .chartPlaceholder {
+    max-width: 95vw;
+    padding: 8px 2vw;
+  }
 }
