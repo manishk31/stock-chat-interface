@@ -72,12 +72,13 @@ export default function Home() {
   const [historySeries, setHistorySeries] = useState<Record<string, unknown>[]>([]);
   const [theme, setTheme] = useState<string>("");
   const [showConfetti, setShowConfetti] = useState(false);
+  const [chatBotOpen, setChatBotOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const insightRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chat]);
+  }, [chat, chatBotOpen]);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -284,76 +285,65 @@ export default function Home() {
     }
   };
 
+  // Only show AI output (insight) in the main area
+  const latestInsight = chat.findLast((msg) => msg.type === "insight");
+
   return (
-    <div className={`${styles.page} ${theme}`.trim()}>
+    <div className={styles.fullScreenContent}>
       {showConfetti && <div className={styles.confetti}>🎉✨🎊🤑💸</div>}
-      <main className={styles.main}>
-        <h1>Stock Chat Interface</h1>
-        <div className={styles.chatContainer}>
-          {chat.map((msg, idx) => {
-            if (msg.type === "chart" && historySeries.length > 0) {
-              return <React.Fragment key={idx}>{renderChart()}</React.Fragment>;
-            }
-            if (msg.type === "funny") {
-              return (
-                <div key={idx} className={styles.funnyBubble}>
-                  🤓 {msg.text}
-                </div>
-              );
-            }
-            // Render AI insight as markdown with PDF export button
-            if (msg.type === "insight") {
-              const isLatest = idx === chat.length - 1 || (chat.slice(idx + 1).findIndex(m => m.type === "insight") === -1);
-              return (
-                <div key={idx} className={styles.aiBubble}>
-                  <div ref={isLatest ? insightRef : undefined} className={styles.bubbleContent}>
-                    <ReactMarkdown rehypePlugins={[rehypeRaw]}>{msg.text}</ReactMarkdown>
-                  </div>
-                  {isLatest && (
-                    <button className={styles.sendBtn} style={{ marginTop: 8 }} onClick={handleDownloadPDF}>
-                      Download as PDF
-                    </button>
-                  )}
-                  <div className={styles.timestamp}>{msg.timestamp}</div>
-                </div>
-              );
-            }
-            return (
-              <div
-                key={idx}
-                className={
-                  msg.sender === "user"
-                    ? styles.userBubble
-                    : styles.aiBubble
-                }
-              >
-                <div className={styles.bubbleContent}>{msg.text}</div>
+      <h1 style={{marginBottom: 0}}>Stock Chat Interface</h1>
+      {/* Main AI output area */}
+      <div style={{width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+        {latestInsight && (
+          <div className={styles.aiBubble} style={{background: 'none', boxShadow: 'none', margin: 0, padding: 0}}>
+            <div ref={insightRef} className={styles.bubbleContent}>
+              <ReactMarkdown rehypePlugins={[rehypeRaw]}>{latestInsight.text}</ReactMarkdown>
+            </div>
+            <button className={styles.sendBtn} style={{ marginTop: 8 }} onClick={handleDownloadPDF}>
+              Download as PDF
+            </button>
+            <div className={styles.timestamp}>{latestInsight.timestamp}</div>
+          </div>
+        )}
+      </div>
+      {/* Floating chat-bot button */}
+      <button className={styles.chatBotButton} onClick={() => setChatBotOpen((v) => !v)} aria-label="Open chat bot">
+        💬
+      </button>
+      {/* Chat-bot window */}
+      {chatBotOpen && (
+        <div className={styles.chatBotWindow}>
+          <div className={styles.chatBotHeader}>
+            StockBot
+            <button className={styles.chatBotClose} onClick={() => setChatBotOpen(false)} aria-label="Close chat bot">×</button>
+          </div>
+          <div className={styles.chatBotBody}>
+            {chat.map((msg, idx) => (
+              <div key={idx} style={{marginBottom: 8, textAlign: msg.sender === 'user' ? 'right' : 'left'}}>
+                <span style={{background: msg.sender === 'user' ? '#0070f3' : '#eaf6ff', color: msg.sender === 'user' ? '#fff' : '#222', borderRadius: 12, padding: '6px 12px', display: 'inline-block'}}>
+                  {msg.text}
+                </span>
                 <div className={styles.timestamp}>{msg.timestamp}</div>
               </div>
-            );
-          })}
-          <div ref={chatEndRef} />
+            ))}
+            <div ref={chatEndRef} />
+          </div>
+          <div className={styles.chatBotInputRow}>
+            <input
+              type="text"
+              placeholder="Type a company name, symbol, or question..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !loading) handleSend(); }}
+              disabled={loading}
+              className={styles.chatBotInput}
+            />
+            <button onClick={handleSend} disabled={loading || !input.trim()} className={styles.chatBotSendBtn}>
+              {loading ? "..." : "Send"}
+            </button>
+          </div>
         </div>
-        <div className={styles.inputRow}>
-          <input
-            type="text"
-            placeholder="Type a company name, symbol, or question..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleInputKeyDown}
-            disabled={loading}
-            className={styles.input}
-          />
-          <button onClick={handleSend} disabled={loading || !input.trim()} className={styles.sendBtn}>
-            {loading ? "..." : "Send"}
-          </button>
-        </div>
-        <div className={styles.quickBtns}>
-          <button onClick={() => setInput("Reliance")}>Reliance</button>
-          <button onClick={() => setInput("Infosys")}>Infosys</button>
-          <button onClick={() => setInput("HDFC")}>HDFC</button>
-        </div>
-      </main>
+      )}
     </div>
   );
 }

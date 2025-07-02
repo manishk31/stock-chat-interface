@@ -413,3 +413,187 @@ a.secondary {
     padding: 8px 2vw;
   }
 }
+
+/* Floating chat-bot button */
+.chatBotButton {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 1000;
+  background: #0070f3;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 64px;
+  height: 64px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.chatBotButton:hover {
+  background: #005bb5;
+}
+
+/* Chat-bot window */
+.chatBotWindow {
+  position: fixed;
+  bottom: 110px;
+  right: 32px;
+  z-index: 1100;
+  width: 350px;
+  max-width: 95vw;
+  max-height: 70vh;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1.5px solid #e0e0e0;
+}
+
+@media (max-width: 600px) {
+  .chatBotWindow {
+    width: 98vw;
+    right: 1vw;
+    bottom: 80px;
+  }
+  .chatBotButton {
+    right: 1vw;
+    bottom: 16px;
+    width: 54px;
+    height: 54px;
+    font-size: 1.7em;
+  }
+}
+
+.chatBotHeader {
+  background: #0070f3;
+  color: #fff;
+  padding: 14px 20px;
+  font-weight: bold;
+  font-size: 1.1em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chatBotClose {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.3em;
+  cursor: pointer;
+}
+
+.chatBotBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 14px;
+  background: #f7faff;
+}
+
+.chatBotInputRow {
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px;
+  background: #f2f2f2;
+  border-top: 1px solid #e0e0e0;
+}
+
+.chatBotInput {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  outline: none;
+}
+
+.chatBotSendBtn {
+  background: #0070f3;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0 16px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.chatBotSendBtn:disabled {
+  background: #b3d1fa;
+  cursor: not-allowed;
+}
+
+/* Main content area for AI output */
+.fullScreenContent {
+  width: 100vw;
+  min-height: 100vh;
+  padding: 48px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f6fff6;
+}
+
+/* Polish section card/table styles for exact match */
+.sectionCard {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  border-radius: 18px;
+  margin: 18px 0;
+  padding: 28px 32px 24px 32px;
+  background: #eaffea;
+  border-left: 6px solid #4caf50;
+  max-width: 700px;
+  width: 100%;
+}
+.sectionCard.negative {
+  background: #fff0f0;
+  border-left: 6px solid #f44336;
+}
+.sectionCard.neutral {
+  background: #f7f7f7;
+  border-left: 6px solid #bdbdbd;
+}
+.sectionHeader {
+  font-size: 1.35em;
+  font-weight: bold;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.verdict {
+  font-weight: bold;
+  font-size: 1.1em;
+  margin: 12px 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sectionCard table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 1em;
+}
+.sectionCard th, .sectionCard td {
+  border: 1px solid #d0e6d0;
+  padding: 8px 10px;
+  text-align: left;
+}
+.sectionCard th {
+  background: #e0f7e0;
+  font-weight: bold;
+}
+.sectionCard.negative th {
+  background: #ffe0e0;
+}
+.sectionCard.neutral th {
+  background: #f0f0f0;
+}
