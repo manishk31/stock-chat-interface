@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import styles from "./page.module.css";
-import { Line } from "react-chartjs-2";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import {
@@ -68,8 +67,6 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [chat, setChat] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
-  const [latestStockData, setLatestStockData] = useState<Record<string, unknown> | null>(null);
-  const [historySeries, setHistorySeries] = useState<Record<string, unknown>[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
   const [chatBotOpen, setChatBotOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -100,9 +97,7 @@ export default function Home() {
       const res = await fetch(`/api/stock?symbol=${encodeURIComponent(input.trim())}&history=1`);
       if (res.ok) {
         series = await res.json();
-        setHistorySeries(series);
         bestMatch = series[series.length - 1]; // latest data point
-        setLatestStockData(bestMatch);
         aiMsgs.push({
           sender: "ai",
           text: `Found company: ${bestMatch["Name"] as string}`,
@@ -114,8 +109,6 @@ export default function Home() {
           text: `Could not find any company matching "${input}". Please try again.`,
           timestamp: new Date().toLocaleTimeString(),
         });
-        setLatestStockData(null);
-        setHistorySeries([]);
         setChat((prev) => [...prev, ...aiMsgs]);
         setLoading(false);
         return;
@@ -126,8 +119,6 @@ export default function Home() {
         text: `Error fetching historical data for "${input}".`,
         timestamp: new Date().toLocaleTimeString(),
       });
-      setLatestStockData(null);
-      setHistorySeries([]);
       setChat((prev) => [...prev, ...aiMsgs]);
       setLoading(false);
       return;
