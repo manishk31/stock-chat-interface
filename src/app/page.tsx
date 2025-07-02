@@ -70,7 +70,6 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [latestStockData, setLatestStockData] = useState<Record<string, unknown> | null>(null);
   const [historySeries, setHistorySeries] = useState<Record<string, unknown>[]>([]);
-  const [theme, setTheme] = useState<string>("");
   const [showConfetti, setShowConfetti] = useState(false);
   const [chatBotOpen, setChatBotOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -91,7 +90,6 @@ export default function Home() {
     setChat((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
-    setTheme("");
     setShowConfetti(false);
 
     // 1. Fetch historical data for the symbol
@@ -152,13 +150,8 @@ export default function Home() {
       });
       // Set theme and confetti/warning based on insight
       if (isPositiveInsight(insightText)) {
-        setTheme(styles.positiveTheme);
         setShowConfetti(true);
       } else if (isNegativeInsight(insightText)) {
-        setTheme(styles.negativeTheme);
-        setShowConfetti(false);
-      } else {
-        setTheme("");
         setShowConfetti(false);
       }
     } catch (err) {
@@ -220,61 +213,6 @@ export default function Home() {
     setLoading(false);
     // Hide confetti after 2s
     if (showConfetti) setTimeout(() => setShowConfetti(false), 2000);
-  };
-
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !loading) {
-      handleSend();
-    }
-  };
-
-  // Chart rendering logic for historical series
-  const renderChart = () => {
-    if (!historySeries || historySeries.length === 0) return null;
-    // Try to extract price and volume series
-    const labels = historySeries.map((entry) => (entry.date as string)?.slice(0, 10));
-    const prices = historySeries.map((entry) => parseFloat((entry["Close Price"] as string)?.replace(/,/g, "") || "0"));
-    const volumes = historySeries.map((entry) => parseFloat((entry["Daily Volume"] as string)?.replace(/,/g, "") || "0"));
-    const data = {
-      labels,
-      datasets: [
-        {
-          label: "Price",
-          data: prices,
-          borderColor: "#0070f3",
-          backgroundColor: "rgba(0,112,243,0.1)",
-          yAxisID: "y",
-        },
-        {
-          label: "Volume",
-          data: volumes,
-          borderColor: "#f39c12",
-          backgroundColor: "rgba(243,156,18,0.1)",
-          yAxisID: "y1",
-        },
-      ],
-    };
-    const options = {
-      responsive: true,
-      plugins: {
-        legend: { position: "top" as const },
-        title: { display: true, text: `Historical Price & Volume for ${latestStockData ? (latestStockData["Name"] as string) : ""}` },
-      },
-      scales: {
-        y: { type: "linear" as const, display: true, position: "left" as const },
-        y1: {
-          type: "linear" as const,
-          display: true,
-          position: "right" as const,
-          grid: { drawOnChartArea: false },
-        },
-      },
-    };
-    return (
-      <div className={styles.chartPlaceholder}>
-        <Line data={data} options={options} />
-      </div>
-    );
   };
 
   // PDF export handler
