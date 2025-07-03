@@ -199,26 +199,84 @@ export async function POST(req: NextRequest) {
         }
 
         // 4. Call OpenAI with complete data
-        const prompt = `You are a senior investment analyst. Analyze the following stock data and provide a comprehensive investment evaluation.
+        const prompt = `You are a senior investment analyst. Use the following AI Evaluation Framework to analyze the stock and produce a detailed, strategic investment evaluation. For every section, explain both "Why Invest" and "Why Not Invest" using the logic and metrics provided. Use markdown tables and clear headers. Be actionable and strategic.
 
 Stock Data:
 ${JSON.stringify(mergedData, null, 2)}
 
-${historicalData ? `Historical Data:
-${JSON.stringify(historicalData, null, 2)}` : ''}
+${historicalData ? `Historical Data:\n${JSON.stringify(historicalData, null, 2)}` : ''}
 
-Please provide a detailed investment evaluation with the following sections:
+---
 
-1. **Financial Strength** - Analyze ROE, ROCE, Net Margin, Debt ratios, Interest coverage
-2. **Growth Potential** - Analyze EPS growth, revenue growth, industry outlook
-3. **Valuation** - Compare PE, PB ratios with sector averages, fair value assessment
-4. **Ownership & Trust** - Promoter holding, institutional holding, pledging
-5. **Market Sentiment & Technicals** - RSI, analyst ratings, price momentum
-6. **₹100,000 Investment Simulation** - Show potential returns under different scenarios
-7. **Investment Approach for ₹100,000** - Lump sum vs tranches with specific price points
-8. **Final Recommendation Block** - Summary verdict with JSON format
+# AI Evaluation Framework
 
-Use simple language, clear headers, bullet points, and markdown tables. Be friendly and explain concepts clearly.`;
+## 1. Financial Strength
+- **Metrics:** ROE, ROCE, Net Profit Margin, Free Cash Flow, Debt/Equity, Interest Coverage
+- **Why Invest:** Positive cash flow, ROE > 15%, Debt/Equity < 0.5, stable earnings
+- **Why Not Invest:** High leverage (D/E > 1), negative FCF, low interest coverage → distress risk
+
+## 2. Growth Potential
+- **Scenarios:**
+  - Bear → EPS drops 10%
+  - Base → EPS grows 20%
+  - Bull → EPS grows 50%
+- **Why Invest:** Stable or improving EPS; sector tailwinds
+- **Why Not Invest:** Past EPS decline, inconsistent performance, no growth catalysts
+
+## 3. Valuation
+- **Calculations:**
+  - Forecasted Price = EPS_next_year × PE_multiple
+  - Bear: -10% EPS, PE 15
+  - Base: +20% EPS, PE 25
+  - Bull: +50% EPS, PE 35
+- **Why Invest:** Current PE < Sector PE, Forward PE < Current PE
+- **Why Not Invest:** Overvalued PE, market has priced in full upside
+
+## 4. Ownership & Trust
+- **Check:** Promoter Holding, Pledged Shares %, FII/DII Holdings
+- **Why Invest:** High promoter skin-in-the-game (>50%), 0% pledging
+- **Why Not Invest:** >10% pledged shares, promoter selling, no institutional trust
+
+## 5. Market Sentiment & Technicals
+- **Signals:** RSI, % below 52W High, Analyst ratings
+- **Why Invest:** RSI < 40 (oversold), positive analyst consensus
+- **Why Not Invest:** RSI > 70 (overbought), no analyst coverage = low conviction
+
+## 6. Price Forecast Table (1Y)
+Create a markdown table:
+| Scenario | EPS | PE | Forecasted Price | % Gain/Loss |
+|---|---|---|---|---|
+| Bear | (calc) | 15 | (calc) | (calc) |
+| Base | (calc) | 25 | (calc) | (calc) |
+| Bull | (calc) | 35 | (calc) | (calc) |
+
+## 7. ₹100,000 Investment Simulation
+- Compute: Units = 100000 / current price
+- Projected portfolio value under each scenario
+- Output as markdown table:
+| Scenario | Exit Value | Gain/Loss |
+|---|---|---|
+| Bear | (calc) | (calc) |
+| Base | (calc) | (calc) |
+| Bull | (calc) | (calc) |
+
+## 8. Investment Approach for ₹100,000
+- Decide on Lump Sum vs Tranches
+- If tranches, suggest price points and allocation per tranche
+- Explain reasoning
+
+## 9. Final Recommendation Block
+- **Verdict:** Invest / Watch / Avoid - Explain Why
+- **Type:** Core / Speculative / High-risk - Explain Why
+- **Why Invest:** Summarized pros from all sections - Explain Why
+- **Why Not Invest:** Summarized risks from all sections - Explain Why
+- **Suggested Allocation:** e.g., 5-10% - Explain Why
+- **Hold Period:** Recommend a time window (e.g., 6-12 months, 12-24 months) and explain why
+- **Triggers to Monitor:** List key triggers (e.g., promoter pledging decrease, quarterly EPS beat, MF/FII entry, etc.)
+
+---
+
+Use simple language, clear headers, bullet points, and markdown tables. Be friendly and explain concepts clearly. Focus on actionable insights and practical investment advice.`;
 
         const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',

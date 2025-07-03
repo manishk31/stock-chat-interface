@@ -200,12 +200,57 @@ a.secondary {
   max-width: 70%;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   margin-bottom: 2px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .bubbleContent {
   font-size: 16px;
   line-height: 1.5;
   word-break: break-word;
+  margin: 0 auto;
+  text-align: left;
+  display: block;
+  width: 100%;
+  max-width: 700px;
+}
+
+.bubbleContent h2, .bubbleContent h3, .bubbleContent h4 {
+  margin-top: 28px;
+  margin-bottom: 12px;
+}
+
+.bubbleContent ul, .bubbleContent ol {
+  margin-left: 24px;
+  margin-bottom: 16px;
+}
+
+.bubbleContent p {
+  margin-bottom: 12px;
+}
+
+.bubbleContent table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+
+.bubbleContent th, .bubbleContent td {
+  border: 1px solid #ccc;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.bubbleContent th {
+  background: #f2f2f2;
+  font-weight: 600;
+}
+
+.bubbleContent tr:nth-child(even) {
+  background: #fafafa;
 }
 
 .timestamp {
@@ -532,68 +577,344 @@ a.secondary {
 
 /* Main content area for AI output */
 .fullScreenContent {
-  width: 100vw;
   min-height: 100vh;
-  padding: 48px 0 0 0;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #f6fff6;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Polish section card/table styles for exact match */
-.sectionCard {
-  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-  border-radius: 18px;
-  margin: 18px 0;
-  padding: 28px 32px 24px 32px;
-  background: #eaffea;
-  border-left: 6px solid #4caf50;
-  max-width: 700px;
-  width: 100%;
-}
-.sectionCard.negative {
-  background: #fff0f0;
-  border-left: 6px solid #f44336;
-}
-.sectionCard.neutral {
-  background: #f7f7f7;
-  border-left: 6px solid #bdbdbd;
-}
-.sectionHeader {
-  font-size: 1.35em;
-  font-weight: bold;
-  margin-bottom: 12px;
+/* Tab Navigation */
+.tabNavigation {
   display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.verdict {
-  font-weight: bold;
-  font-size: 1.1em;
-  margin: 12px 0 8px 0;
-  display: flex;
-  align-items: center;
   gap: 8px;
+  margin: 20px 0;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
 }
-.sectionCard table {
+
+.tabButton {
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.tabButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.activeTab {
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Main Content Area */
+.mainContent {
   width: 100%;
-  border-collapse: collapse;
-  margin: 16px 0;
-  font-size: 1em;
+  max-width: 1200px;
+  min-height: 400px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 24px;
+  margin: 20px 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  color: #333;
 }
-.sectionCard th, .sectionCard td {
-  border: 1px solid #d0e6d0;
-  padding: 8px 10px;
-  text-align: left;
+
+/* Portfolio Section */
+.portfolioSection {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
-.sectionCard th {
-  background: #e0f7e0;
-  font-weight: bold;
+
+.portfolioSummary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 24px;
+  border-radius: 12px;
+  color: white;
 }
-.sectionCard.negative th {
-  background: #ffe0e0;
+
+.portfolioSummary h3 {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  font-weight: 600;
 }
-.sectionCard.neutral th {
-  background: #f0f0f0;
+
+.summaryCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.summaryCard {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.summaryCard h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.summaryCard p {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.portfolioHoldings {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.portfolioHoldings h3 {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.holdingsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.holdingItem {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.holdingHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.holdingHeader h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.holdingDetails {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Portfolio Analytics */
+.portfolioAnalytics {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.portfolioAnalytics h3 {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.analyticsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.analyticsCard {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.analyticsCard h4 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.analyticsItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.analyticsItem:last-child {
+  border-bottom: none;
+}
+
+.recommendationItem {
+  padding: 8px 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* Watchlist Section */
+.watchlistSection {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.watchlistSection h3 {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.watchlistItems {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.watchlistItem {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.watchlistItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.watchlistHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.watchlistHeader h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.watchlistPrice {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+}
+
+/* Charts Section */
+.chartsSection {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chartsSection h3 {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.chartContainer {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.chartContainer h4 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+}
+
+/* Utility Classes */
+.positive {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.negative {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .tabNavigation {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .tabButton {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  
+  .mainContent {
+    padding: 16px;
+    margin: 16px 0;
+  }
+  
+  .summaryCards {
+    grid-template-columns: 1fr;
+  }
+  
+  .watchlistItems {
+    grid-template-columns: 1fr;
+  }
+  
+  .holdingHeader,
+  .holdingDetails {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .watchlistHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
 }
