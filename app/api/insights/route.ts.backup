@@ -2,31 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-// Helper to compress history for a symbol (kept for symbol deep-dive logic)
-function compressHistoryForSymbol(history: unknown[], symbol: string) {
-  // Try to match by 'Name' or 'symbol' field
-  const symbolHistory = (history as Record<string, unknown>[]).filter(
-    (entry) =>
-      (entry.symbol && entry.symbol === symbol) ||
-      (entry.Name && entry.Name === symbol)
-  );
-  if (!Array.isArray(symbolHistory) || symbolHistory.length === 0) return [];
-  const compressed: Record<string, unknown>[] = [];
-  let prev: Record<string, unknown> = {};
-  for (const entry of symbolHistory) {
-    const diff: Record<string, unknown> = { date: entry.date };
-    for (const key of Object.keys(entry)) {
-      if (key === 'date' || key === 'symbol' || key === 'Name') continue;
-      if (entry[key] !== prev[key]) {
-        diff[key] = entry[key];
-      }
-    }
-    compressed.push(diff);
-    prev = entry;
-  }
-  return compressed;
-}
-
 export async function POST(req: NextRequest) {
   if (!OPENAI_API_KEY) {
     return NextResponse.json({ error: 'OpenAI API key not set' }, { status: 500 });
@@ -141,4 +116,4 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to call OpenAI API' }, { status: 500 });
     }
   }
-} 
+}

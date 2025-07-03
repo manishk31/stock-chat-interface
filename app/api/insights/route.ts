@@ -199,7 +199,7 @@ export async function POST(req: NextRequest) {
         }
 
         // 4. Call OpenAI with complete data
-        const prompt = `You are a senior investment analyst with expertise in Indian equity markets. Analyze the following stock data and provide a comprehensive strategic investment evaluation using the AI Framework.
+        const prompt = `You are a senior investment analyst. Analyze the following stock data and provide a comprehensive investment evaluation.
 
 Stock Data:
 ${JSON.stringify(mergedData, null, 2)}
@@ -207,117 +207,18 @@ ${JSON.stringify(mergedData, null, 2)}
 ${historicalData ? `Historical Data:
 ${JSON.stringify(historicalData, null, 2)}` : ''}
 
-Please provide a detailed investment evaluation with the following EXACT sections in this order:
+Please provide a detailed investment evaluation with the following sections:
 
-## 1. Financial Strength
-**Metrics to Analyze:**
-- ROE, ROCE
-- Net Profit Margin
-- Free Cash Flow
-- Debt/Equity
-- Interest Coverage
+1. **Financial Strength** - Analyze ROE, ROCE, Net Margin, Debt ratios, Interest coverage
+2. **Growth Potential** - Analyze EPS growth, revenue growth, industry outlook
+3. **Valuation** - Compare PE, PB ratios with sector averages, fair value assessment
+4. **Ownership & Trust** - Promoter holding, institutional holding, pledging
+5. **Market Sentiment & Technicals** - RSI, analyst ratings, price momentum
+6. **₹100,000 Investment Simulation** - Show potential returns under different scenarios
+7. **Investment Approach for ₹100,000** - Lump sum vs tranches with specific price points
+8. **Final Recommendation Block** - Summary verdict with JSON format
 
-**Logic:**
-✅ **Why Invest:** Positive cash flow, ROE > 15%, Debt/Equity < 0.5, stable earnings
-❌ **Why Not Invest:** High leverage (D/E > 1), negative FCF, low interest coverage → distress risk
-
-## 2. Growth Potential
-**Scenarios:**
-- Bear → EPS drops 10%
-- Base → EPS grows 20%
-- Bull → EPS grows 50%
-
-**Logic:**
-✅ **Why Invest:** Stable or improving EPS; sector tailwinds
-❌ **Why Not Invest:** Past EPS decline, inconsistent performance, no growth catalysts
-
-## 3. Valuation
-**Calculations:**
-Forecasted Price = EPS_next_year × PE_multiple
-
-| Scenario | EPS | PE | Price |
-|----------|-----|----|-------|
-| Bear | -10% | 15 | ↓ |
-| Base | +20% | 25 | ~ |
-| Bull | +50% | 35 | ↑↑ |
-
-**Logic:**
-✅ **Why Invest:** Current PE < Sector PE, Forward PE < Current PE
-❌ **Why Not Invest:** Overvalued PE, market has priced in full upside
-
-## 4. Ownership & Trust
-**Check:**
-- Promoter Holding
-- Pledged Shares %
-- FII/DII Holdings
-
-**Logic:**
-✅ **Why Invest:** High promoter skin-in-the-game (>50%), 0% pledging
-❌ **Why Not Invest:** >10% pledged shares, promoter selling, no institutional trust
-
-## 5. Market Sentiment & Technicals
-**Signals:**
-- RSI
-- % below 52W High
-- Analyst ratings
-
-**Logic:**
-✅ **Why Invest:** RSI < 40 (oversold), positive analyst consensus
-❌ **Why Not Invest:** RSI > 70 (overbought), no analyst coverage = low conviction
-
-## 6. Price Forecast Table (1Y)
-Create this exact table with actual calculations based on current EPS and price:
-
-| Scenario | EPS | PE | Forecasted Price | % Gain/Loss |
-|----------|-----|----|------------------|-------------|
-| Bear | ₹X | 15 | ₹X | -XX% |
-| Base | ₹X | 25 | ₹X | +XX% |
-| Bull | ₹X | 35 | ₹X | +XXX% |
-
-## 7. ₹100,000 Investment Simulation
-**Compute:**
-- Units = 100000 / current price
-- Projected portfolio value under each scenario
-- Return ₹ and %
-
-**Output:**
-
-| Scenario | Exit Value | Gain/Loss |
-|----------|------------|-----------|
-| Bear | ₹X | -₹X |
-| Base | ₹X | +₹X |
-| Bull | ₹X | +₹X |
-
-## 8. Investment Approach for ₹100,000
-**Decide on Lump Sum vs Tranches:**
-
-**Lump Sum Investment:**
-Suitable for investors confident in the stock's current valuation and growth prospects.
-
-**Tranches Investment:**
-- First Tranche: ₹X of 100000 at price ₹X.00
-- Second Tranche: ₹X of 100000 if price drops to ₹X.00
-- Third Tranche: ₹X of 100000 if price drops to ₹X
-
-This approach mitigates risk by averaging the purchase price.
-
-## 9. Final Recommendation Block
-
-**Verdict:** "Invest / Watch / Avoid" - Explain Why
-**Type:** "Core / Speculative / High-risk" - Explain Why
-**Why Invest:** "Summarized pros from all sections" - Explain Why
-**Why Not Invest:** "Summarized risks from all sections" - Explain Why
-**Suggested Allocation:** "e.g., 5-10%" - Explain Why
-**Hold Period:** Analyze and recommend the time window to hold the share. It can be anytime between 1 day to 2 years, eg: 6-12 months or 12-24 months. But explain why behind hold period.
-**Triggers to Monitor:** Promoter pledging decrease, Quarterly EPS beat, MF/FII entry or any other factors which you think would be valuable.
-
-CRITICAL REQUIREMENTS:
-1. Include ALL 9 sections exactly as specified above
-2. Calculate actual numbers for the Price Forecast Table and Investment Simulation based on the provided data
-3. Use the exact table formats shown above
-4. Include the complete Final Recommendation Block with all fields
-5. Use simple language, clear headers, bullet points, and markdown tables
-6. Be friendly and explain concepts clearly`;
+Use simple language, clear headers, bullet points, and markdown tables. Be friendly and explain concepts clearly.`;
 
         const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
@@ -366,38 +267,18 @@ CRITICAL REQUIREMENTS:
         const filteredStocks = filterStocksByCriteria(allStocks, query);
         console.log('Filtered to', filteredStocks.length, 'stocks');
         
-        // Limit to 3 stocks to avoid token limits and create a more focused analysis
-        const limitedStocks = filteredStocks.slice(0, 3);
-        
-        // Create a simplified data structure to reduce tokens
-        const simplifiedStocks = limitedStocks.map(stock => ({
-          Name: stock.Name,
-          'Market Cap': stock['↓Market Cap'],
-          'Close Price': stock['Close Price'],
-          'PE Ratio': stock['PE Ratio'],
-          'ROE': stock['Return on Equity'],
-          'Debt to Equity': stock['Debt to Equity'],
-          'Dividend Yield': stock['Dividend Yield'],
-          '1Y EPS Growth': stock['1Y Historical EPS Growth'],
-          '1Y Revenue Growth': stock['1Y Historical Revenue Growth'],
-          'RSI': stock['RSI – 14D'],
-          'Analyst Buy %': stock['Percentage Buy Reco\'s'],
-          'Promoter Holding': stock['Promoter Holding'],
-          'Sub-Sector': stock['Sub-Sector']
-        }));
-        
         // 3. Create analysis prompt with filtered data
         const analysisPrompt = `You are a senior investment analyst. The user has asked: "${query}"
 
 I have analyzed the Indian stock market and applied sophisticated filtering based on your criteria. Here are the top stocks that match your requirements:
 
-${JSON.stringify(simplifiedStocks, null, 2)}
+${JSON.stringify(filteredStocks, null, 2)}
 
 Please provide a comprehensive analysis with:
 
 1. **Query Interpretation** - What the user is looking for and why it's important
-2. **Screening Criteria Used** - Explain the specific filters applied and their significance  
-3. **Top Recommendations** - 3 best stocks with detailed reasons for selection
+2. **Screening Criteria Used** - Explain the specific filters applied and their significance
+3. **Top Recommendations** - 5-10 best stocks with detailed reasons for selection
 4. **Risk Assessment** - Potential risks and considerations for this type of investment
 5. **Investment Strategy** - How to approach these stocks (timing, allocation, etc.)
 6. **Portfolio Allocation** - Suggested allocation for ₹100,000 investment
@@ -408,62 +289,33 @@ Use simple language, clear headers, bullet points, and markdown tables. Be frien
 
         console.log('Calling OpenAI for advanced analysis...');
         console.log('OpenAI API Key available:', !!OPENAI_API_KEY);
-        console.log('Number of stocks being sent:', simplifiedStocks.length);
+        console.log('Number of stocks being sent:', filteredStocks.length);
         
-        // Add retry logic for rate limits
-        let retries = 0;
-        const maxRetries = 3;
-        
-        while (retries < maxRetries) {
-          try {
-            const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${OPENAI_API_KEY}`
-              },
-              body: JSON.stringify({
-                model: 'gpt-4o',
-                messages: [{ role: 'user', content: analysisPrompt }],
-                max_tokens: 2000,
-                temperature: 0.3
-              })
-            });
+        const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENAI_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o',
+            messages: [{ role: 'user', content: analysisPrompt }],
+            max_tokens: 4000,
+            temperature: 0.3
+          })
+        });
 
-            if (!openAIResponse.ok) {
-              const errorText = await openAIResponse.text();
-              console.error('OpenAI API error:', errorText);
-              
-              // Check if it's a rate limit error
-              if (errorText.includes('rate_limit') || errorText.includes('Rate limit')) {
-                retries++;
-                if (retries < maxRetries) {
-                  console.log(`Rate limit hit, retrying in ${retries * 5} seconds...`);
-                  await new Promise(resolve => setTimeout(resolve, retries * 5000));
-                  continue;
-                }
-              }
-              
-              return NextResponse.json({ error: 'OpenAI API error: ' + errorText }, { status: 500 });
-            }
-
-            const openAIData = await openAIResponse.json();
-            const insight = openAIData.choices[0]?.message?.content || 'No analysis available';
-
-            console.log('Advanced analysis completed successfully');
-            return NextResponse.json({ insight });
-            
-          } catch (error) {
-            console.error('Error in OpenAI call:', error);
-            retries++;
-            if (retries < maxRetries) {
-              console.log(`Retrying in ${retries * 2} seconds...`);
-              await new Promise(resolve => setTimeout(resolve, retries * 2000));
-              continue;
-            }
-            return NextResponse.json({ error: 'OpenAI API call failed after retries' }, { status: 500 });
-          }
+        if (!openAIResponse.ok) {
+          const errorText = await openAIResponse.text();
+          console.error('OpenAI API error:', errorText);
+          return NextResponse.json({ error: 'OpenAI API error' }, { status: 500 });
         }
+
+        const openAIData = await openAIResponse.json();
+        const insight = openAIData.choices[0]?.message?.content || 'No analysis available';
+
+        console.log('Advanced analysis completed successfully');
+        return NextResponse.json({ insight });
         
       } catch (error) {
         console.error('Error in advanced query processing:', error);
@@ -474,4 +326,4 @@ Use simple language, clear headers, bullet points, and markdown tables. Be frien
     console.error('General error in insights API:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

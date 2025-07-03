@@ -19,7 +19,7 @@ export default function Home() {
   const [chatBotOpen, setChatBotOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const insightRef = useRef<HTMLDivElement>(null);
-  const [previousResults, setPreviousResults] = useState<any>(null);
+  const [previousResults, setPreviousResults] = useState<unknown>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -121,7 +121,13 @@ export default function Home() {
   };
 
   // Only show AI output (insight) in the main area
-  const latestInsight = chat.findLast((msg) => msg.type === "insight");
+  let latestInsight: ChatMessage | undefined = undefined;
+  for (let i = chat.length - 1; i >= 0; i--) {
+    if (chat[i].type === "insight") {
+      latestInsight = chat[i];
+      break;
+    }
+  }
 
   return (
     <div className={styles.fullScreenContent}>
