@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 interface ChatMessage {
   sender: "user" | "ai";
@@ -11,13 +11,11 @@ interface ChatMessage {
 
 const Home: React.FC = () => {
   const [portfolio, setPortfolio] = useState<Record<string, unknown>[]>([]);
-  const [chartData, setChartData] = useState<Record<string, unknown> | null>(null);
   const [portfolioAnalytics, setPortfolioAnalytics] = useState<Record<string, unknown> | null>(null);
-  const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const fetchPortfolioAnalytics = async () => {
+  const fetchPortfolioAnalytics = useCallback(async () => {
     // ...fetch logic here...
-  };
+  }, []);
 
   useEffect(() => {
     if (portfolio.length > 0) {
@@ -25,9 +23,7 @@ const Home: React.FC = () => {
     } else {
       setPortfolioAnalytics(null);
     }
-  }, [portfolio]);
-
-  // ...rest of your component logic...
+  }, [portfolio, fetchPortfolioAnalytics]);
 
   return (
     <div>
