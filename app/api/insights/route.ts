@@ -30,15 +30,16 @@ function isIndividualStockQuery(query: string): boolean {
 }
 
 // Helper function to categorize market cap
-function getMarketCapCategory(marketCap: string): string {
-  const cap = parseFloat(marketCap.replace(/[^\d.]/g, ''));
+function getMarketCapCategory(marketCap: unknown): string {
+  const marketCapStr = String(marketCap || '');
+  const cap = parseFloat(marketCapStr.replace(/[^\d.]/g, ''));
   if (cap >= 20000) return 'Large Cap';
   if (cap >= 5000) return 'Mid Cap';
   return 'Small Cap';
 }
 
 // Helper function to filter stocks based on complex criteria
-function filterStocksByCriteria(stocks: any[], query: string): any[] {
+function filterStocksByCriteria(stocks: Record<string, unknown>[], query: string): Record<string, unknown>[] {
   const lowerQuery = query.toLowerCase();
   
   // Market cap filters
@@ -52,79 +53,79 @@ function filterStocksByCriteria(stocks: any[], query: string): any[] {
   
   // ROE filters
   if (lowerQuery.includes('highest roe') || lowerQuery.includes('high roe')) {
-    stocks = stocks.filter(stock => parseFloat(stock['Return on Equity'] || '0') > 15);
-    stocks.sort((a, b) => parseFloat(b['Return on Equity'] || '0') - parseFloat(a['Return on Equity'] || '0'));
+    stocks = stocks.filter(stock => parseFloat(String(stock['Return on Equity'] || '0')) > 15);
+    stocks.sort((a, b) => parseFloat(String(b['Return on Equity'] || '0')) - parseFloat(String(a['Return on Equity'] || '0')));
   }
   
   // P/E filters
   if (lowerQuery.includes('low p/e') || lowerQuery.includes('low pe') || lowerQuery.includes('undervalued')) {
     stocks = stocks.filter(stock => {
-      const pe = parseFloat(stock['PE Ratio'] || '0');
+      const pe = parseFloat(String(stock['PE Ratio'] || '0'));
       return pe > 0 && pe < 25;
     });
-    stocks.sort((a, b) => parseFloat(a['PE Ratio'] || '999') - parseFloat(b['PE Ratio'] || '999'));
+    stocks.sort((a, b) => parseFloat(String(a['PE Ratio'] || '999')) - parseFloat(String(b['PE Ratio'] || '999')));
   }
   
   // Debt filters
   if (lowerQuery.includes('zero debt') || lowerQuery.includes('no debt')) {
-    stocks = stocks.filter(stock => parseFloat(stock['Debt to Equity'] || '999') === 0);
+    stocks = stocks.filter(stock => parseFloat(String(stock['Debt to Equity'] || '999')) === 0);
   }
   
   // Free cash flow filters
   if (lowerQuery.includes('free cash flow') || lowerQuery.includes('fcf')) {
-    stocks = stocks.filter(stock => parseFloat(stock['Free Cash Flow'] || '0') > 0);
+    stocks = stocks.filter(stock => parseFloat(String(stock['Free Cash Flow'] || '0')) > 0);
   }
   
   // Dividend yield filters
   if (lowerQuery.includes('dividend') || lowerQuery.includes('high dividend')) {
-    stocks = stocks.filter(stock => parseFloat(stock['Dividend Yield'] || '0') > 1);
-    stocks.sort((a, b) => parseFloat(b['Dividend Yield'] || '0') - parseFloat(a['Dividend Yield'] || '0'));
+    stocks = stocks.filter(stock => parseFloat(String(stock['Dividend Yield'] || '0')) > 1);
+    stocks.sort((a, b) => parseFloat(String(b['Dividend Yield'] || '0')) - parseFloat(String(a['Dividend Yield'] || '0')));
   }
   
   // Growth filters
   if (lowerQuery.includes('eps growth') || lowerQuery.includes('earnings growth')) {
-    stocks = stocks.filter(stock => parseFloat(stock['1Y Historical EPS Growth'] || '0') > 10);
-    stocks.sort((a, b) => parseFloat(b['1Y Historical EPS Growth'] || '0') - parseFloat(a['1Y Historical EPS Growth'] || '0'));
+    stocks = stocks.filter(stock => parseFloat(String(stock['1Y Historical EPS Growth'] || '0')) > 10);
+    stocks.sort((a, b) => parseFloat(String(b['1Y Historical EPS Growth'] || '0')) - parseFloat(String(a['1Y Historical EPS Growth'] || '0')));
   }
   
   // Revenue growth filters
   if (lowerQuery.includes('revenue growth') || lowerQuery.includes('sales growth')) {
-    stocks = stocks.filter(stock => parseFloat(stock['1Y Historical Revenue Growth'] || '0') > 10);
-    stocks.sort((a, b) => parseFloat(b['1Y Historical Revenue Growth'] || '0') - parseFloat(a['1Y Historical Revenue Growth'] || '0'));
+    stocks = stocks.filter(stock => parseFloat(String(stock['1Y Historical Revenue Growth'] || '0')) > 10);
+    stocks.sort((a, b) => parseFloat(String(b['1Y Historical Revenue Growth'] || '0')) - parseFloat(String(a['1Y Historical Revenue Growth'] || '0')));
   }
   
   // Sector filters
   if (lowerQuery.includes('fmcg')) {
-    stocks = stocks.filter(stock => stock['Sub-Sector']?.toLowerCase().includes('fmcg'));
+    stocks = stocks.filter(stock => String(stock['Sub-Sector'] || '').toLowerCase().includes('fmcg'));
   }
   if (lowerQuery.includes('bank') || lowerQuery.includes('banking')) {
-    stocks = stocks.filter(stock => stock['Sub-Sector']?.toLowerCase().includes('bank'));
+    stocks = stocks.filter(stock => String(stock['Sub-Sector'] || '').toLowerCase().includes('bank'));
   }
   if (lowerQuery.includes('it') || lowerQuery.includes('software')) {
-    stocks = stocks.filter(stock => stock['Sub-Sector']?.toLowerCase().includes('it'));
+    stocks = stocks.filter(stock => String(stock['Sub-Sector'] || '').toLowerCase().includes('it'));
   }
   if (lowerQuery.includes('auto') || lowerQuery.includes('automobile')) {
-    stocks = stocks.filter(stock => stock['Sub-Sector']?.toLowerCase().includes('auto'));
+    stocks = stocks.filter(stock => String(stock['Sub-Sector'] || '').toLowerCase().includes('auto'));
   }
   
   // Technical filters
   if (lowerQuery.includes('oversold') || lowerQuery.includes('rsi')) {
-    stocks = stocks.filter(stock => parseFloat(stock['RSI – 14D'] || '50') < 30);
+    stocks = stocks.filter(stock => parseFloat(String(stock['RSI – 14D'] || '50')) < 30);
   }
   if (lowerQuery.includes('overbought')) {
-    stocks = stocks.filter(stock => parseFloat(stock['RSI – 14D'] || '50') > 70);
+    stocks = stocks.filter(stock => parseFloat(String(stock['RSI – 14D'] || '50')) > 70);
   }
   
   // Promoter holding filters
   if (lowerQuery.includes('promoter holding') || lowerQuery.includes('promoter stake')) {
-    stocks = stocks.filter(stock => parseFloat(stock['Promoter Holding'] || '0') > 50);
+    stocks = stocks.filter(stock => parseFloat(String(stock['Promoter Holding'] || '0')) > 50);
   }
   
   // Institutional holding filters
   if (lowerQuery.includes('institutional') || lowerQuery.includes('fii') || lowerQuery.includes('dii')) {
     stocks = stocks.filter(stock => {
-      const fii = parseFloat(stock['Foreign Institutional Holding'] || '0');
-      const dii = parseFloat(stock['Domestic Institutional Holding'] || '0');
+      const fii = parseFloat(String(stock['Foreign Institutional Holding'] || '0'));
+      const dii = parseFloat(String(stock['Domestic Institutional Holding'] || '0'));
       return (fii + dii) > 20;
     });
   }

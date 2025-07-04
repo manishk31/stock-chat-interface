@@ -187,7 +187,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   return NextResponse.json({ 
     message: 'Portfolio Analytics API',
     endpoints: {

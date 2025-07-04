@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import styles from "./page.module.css";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
@@ -30,7 +30,7 @@ interface ChatMessage {
   text: string;
   timestamp: string;
   type?: "text" | "chart" | "sentiment" | "insight" | "funny" | "portfolio" | "watchlist";
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 interface StockData {
@@ -52,6 +52,37 @@ interface PortfolioItem {
   gainLossPercent: number;
 }
 
+interface RiskMetrics {
+  volatility: number;
+  beta: number;
+  sharpeRatio: number;
+}
+
+interface PortfolioAnalytics {
+  totalValue: number;
+  totalCost: number;
+  totalGainLoss: number;
+  totalGainLossPercent: number;
+  topPerformers: PortfolioItem[];
+  worstPerformers: PortfolioItem[];
+  sectorBreakdown: Record<string, number>;
+  riskMetrics: RiskMetrics;
+  recommendations: string[];
+}
+
+interface ChartDataset {
+  label: string;
+  data: number[];
+  borderColor: string;
+  backgroundColor: string;
+  tension: number;
+}
+
+interface ChartData {
+  labels: string[];
+  datasets: ChartDataset[];
+}
+
 export default function Home() {
   const [input, setInput] = useState("");
   const [chat, setChat] = useState<ChatMessage[]>([]);
@@ -66,9 +97,9 @@ export default function Home() {
   // Portfolio state
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
   const [watchlist, setWatchlist] = useState<StockData[]>([]);
-  const [chartData, setChartData] = useState<any>(null);
+  const [chartData, setChartData] = useState<ChartData | null>(null);
   const [selectedStock, setSelectedStock] = useState<string>("");
-  const [portfolioAnalytics, setPortfolioAnalytics] = useState<any>(null);
+  const [portfolioAnalytics, setPortfolioAnalytics] = useState<PortfolioAnalytics | null>(null);
 
   // Load portfolio and watchlist from localStorage
   useEffect(() => {
@@ -92,16 +123,7 @@ export default function Home() {
     localStorage.setItem('stockWatchlist', JSON.stringify(watchlist));
   }, [watchlist]);
 
-  // Update portfolio analytics when portfolio changes
-  useEffect(() => {
-    if (portfolio.length > 0) {
-      fetchPortfolioAnalytics();
-    } else {
-      setPortfolioAnalytics(null);
-    }
-  }, [portfolio]);
-
-  const fetchPortfolioAnalytics = async () => {
+  const fetchPortfolioAnalytics = useCallback(async () => {
     try {
       const response = await fetch('/api/portfolio', {
         method: 'POST',
@@ -115,7 +137,16 @@ export default function Home() {
     } catch (error) {
       console.error('Error fetching portfolio analytics:', error);
     }
-  };
+  }, [portfolio]);
+
+  // Update portfolio analytics when portfolio changes
+  useEffect(() => {
+    if (portfolio.length > 0) {
+      fetchPortfolioAnalytics();
+    } else {
+      setPortfolioAnalytics(null);
+    }
+  }, [portfolio, fetchPortfolioAnalytics]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -172,11 +203,11 @@ export default function Home() {
     }
   };
 
-  const generateChartData = (historicalData: any[]) => {
+  const generateChartData = (historicalData: Record<string, unknown>[]): ChartData | null => {
     if (!historicalData || historicalData.length === 0) return null;
 
-    const labels = historicalData.map(item => item.date || 'Unknown');
-    const prices = historicalData.map(item => parseFloat(item['Close Price'] || '0'));
+    const labels = historicalData.map(item => String(item.date || 'Unknown'));
+    const prices = historicalData.map(item => parseFloat(String(item['Close Price'] || '0')));
 
     return {
       labels,
@@ -328,7 +359,7 @@ export default function Home() {
           } else {
             setShowConfetti(false);
           }
-        } catch (insightErr) {
+        } catch {
           aiMsgs.push({
             sender: "ai",
             text: `Could not find any company matching "${input}" and no advanced insight could be generated. Please try again.`,
@@ -479,7 +510,7 @@ export default function Home() {
                    <h4>Holdings</h4>
                    <p>{portfolio.length}</p>
                  </div>
-                 {portfolioAnalytics && (
+                 {portfolioAnalytics && 'riskMetrics' in portfolioAnalytics && portfolioAnalytics.riskMetrics && (
                    <div className={styles.summaryCard}>
                      <h4>Risk Level</h4>
                      <p>{portfolioAnalytics.riskMetrics.volatility > 0.2 ? 'High' : portfolioAnalytics.riskMetrics.volatility > 0.1 ? 'Medium' : 'Low'}</p>
