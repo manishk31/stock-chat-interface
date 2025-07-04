@@ -560,21 +560,35 @@ export default function Home() {
                {portfolio.length === 0 ? (
                  <p>No stocks in portfolio yet. Use /add SYMBOL SHARES PRICE to add stocks.</p>
                ) : (
-                 <div className={styles.holdingsList}>
-                   {portfolio.map((item, index) => (
-                     <div key={index} className={styles.holdingItem}>
-                       <div className={styles.holdingHeader}>
-                         <h4>{item.symbol}</h4>
-                         <span className={item.gainLoss >= 0 ? styles.positive : styles.negative}>
-                           {item.gainLoss >= 0 ? '+' : ''}{item.gainLossPercent.toFixed(2)}%
-                         </span>
-                       </div>
-                       <div className={styles.holdingDetails}>
-                         <span>{item.shares} shares @ ${item.avgPrice.toFixed(2)}</span>
-                         <span>${item.totalValue.toFixed(2)}</span>
-                       </div>
-                     </div>
-                   ))}
+                 <div className={styles.tableContainer}>
+                   <table className={styles.portfolioTable}>
+                     <thead>
+                       <tr>
+                         <th>Symbol</th>
+                         <th>Shares</th>
+                         <th>Avg Price</th>
+                         <th>Current Value</th>
+                         <th>P&L</th>
+                         <th>P&L %</th>
+                       </tr>
+                     </thead>
+                     <tbody>
+                       {portfolio.map((item, index) => (
+                         <tr key={index} className={styles.tableRow}>
+                           <td className={styles.symbolCell}>{item.symbol}</td>
+                           <td>{item.shares}</td>
+                           <td>${item.avgPrice.toFixed(2)}</td>
+                           <td>${item.totalValue.toFixed(2)}</td>
+                           <td className={item.gainLoss >= 0 ? styles.positive : styles.negative}>
+                             ${item.gainLoss.toFixed(2)}
+                           </td>
+                           <td className={item.gainLoss >= 0 ? styles.positive : styles.negative}>
+                             {item.gainLoss >= 0 ? '+' : ''}{item.gainLossPercent.toFixed(2)}%
+                           </td>
+                         </tr>
+                       ))}
+                     </tbody>
+                   </table>
                  </div>
                )}
              </div>
