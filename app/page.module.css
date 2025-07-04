@@ -236,21 +236,43 @@ a.secondary {
   width: 100%;
   border-collapse: collapse;
   margin: 16px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .bubbleContent th, .bubbleContent td {
-  border: 1px solid #ccc;
-  padding: 8px 10px;
-  text-align: center;
+  border: 1px solid #e1e5e9;
+  padding: 12px 16px;
+  text-align: left;
+  vertical-align: middle;
 }
 
 .bubbleContent th {
-  background: #f2f2f2;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
   font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .bubbleContent tr:nth-child(even) {
-  background: #fafafa;
+  background: #f8f9fa;
+}
+
+.bubbleContent tr:hover {
+  background: #e9ecef;
+}
+
+.bubbleContent td {
+  font-size: 14px;
+  color: #333;
+}
+
+.bubbleContent td:first-child {
+  font-weight: 600;
+  color: #2c3e50;
 }
 
 .timestamp {

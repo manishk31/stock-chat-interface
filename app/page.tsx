@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import styles from "./page.module.css";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
+import remarkGfm from "remark-gfm";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -480,7 +481,7 @@ export default function Home() {
             {latestInsight && (
               <div className={styles.aiBubble} style={{background: 'none', boxShadow: 'none', margin: 0, padding: 0}}>
                 <div ref={insightRef} className={styles.bubbleContent}>
-                  <ReactMarkdown rehypePlugins={[rehypeRaw]}>{latestInsight.text}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{latestInsight.text}</ReactMarkdown>
                 </div>
                 <button className={styles.sendBtn} style={{ marginTop: 8 }} onClick={handleDownloadPDF}>
                   Download as PDF
