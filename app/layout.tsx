@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Stock Chat Interface',
-  description: 'AI-powered, layman-friendly stock chat interface',
+  title: 'Ginger',
+  description: 'AI-powered stock analysis and portfolio management platform',
 };
 
 export default function RootLayout({

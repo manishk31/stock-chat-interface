@@ -443,7 +443,7 @@ export default function Home() {
   return (
     <div className={styles.fullScreenContent}>
       {showConfetti && <div className={styles.confetti}>🎉✨🎊🤑💸</div>}
-      <h1 style={{marginBottom: 0}}>Stock Chat Interface</h1>
+      <h1 style={{marginBottom: 0}}>Ginger</h1>
       
       {/* Tab Navigation */}
       <div className={styles.tabNavigation}>
@@ -644,7 +644,7 @@ export default function Home() {
       {chatBotOpen && (
         <div className={styles.chatBotWindow}>
           <div className={styles.chatBotHeader}>
-            StockBot
+            Ginger AI
             <button className={styles.chatBotClose} onClick={() => setChatBotOpen(false)} aria-label="Close chat bot">×</button>
           </div>
           <div className={styles.chatBotBody}>
